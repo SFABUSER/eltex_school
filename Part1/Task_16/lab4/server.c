@@ -8,8 +8,8 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define MSG_SIZE 128
 #define PORT 7777
+#define MSG_SIZE 128
 
 struct sockaddr_in server, client;
 
@@ -18,11 +18,15 @@ void main()
     char message[MSG_SIZE];
 
     server.sin_family = AF_INET;
-    server.sin_port = PORT;
+    server.sin_port = htons(PORT);
     inet_pton(AF_INET, "127.0.0.5", &server.sin_addr);
+
     int sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
-    
-    sendto(sock_fd, "Hello!", 7, 0, (struct sockaddr *)&server, sizeof(server));
-    recvfrom(sock_fd, message, MSG_SIZE, 0, NULL, NULL);
+    bind(sock_fd, (struct sockaddr *)&server, sizeof(server));
+
+    socklen_t size = sizeof(client);
+    recvfrom(sock_fd, message, MSG_SIZE, 0, (struct sockaddr *)&client, &size);
     printf("%s\n", message);
-} 
+
+    close(sock_fd);
+}
